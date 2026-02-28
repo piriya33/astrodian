@@ -1,0 +1,65 @@
+{
+	"nodes": [
+		{
+			"id": "node-1",
+			"type": "text",
+			"text": "# Project Dashboard\n\nWelcome to your new project space. Use this canvas to organize your thoughts, tasks, and resources.",
+			"x": -400,
+			"y": -400,
+			"width": 800,
+			"height": 200,
+			"color": "1"
+		},
+		{
+			"id": "node-2",
+			"type": "group",
+			"label": "Active Tasks",
+			"x": -400,
+			"y": -150,
+			"width": 400,
+			"height": 400,
+			"color": "2"
+		},
+		{
+			"id": "node-3",
+			"type": "text",
+			"text": "- [ ] Initial Braindump\n- [ ] Define Project Scope\n- [ ] Create First Resource",
+			"x": -380,
+			"y": -110,
+			"width": 360,
+			"height": 340,
+			"color": "2"
+		},
+		{
+			"id": "node-4",
+			"type": "group",
+			"label": "Key Resources",
+			"x": 50,
+			"y": -150,
+			"width": 350,
+			"height": 400,
+			"color": "3"
+		},
+		{
+			"id": "node-5",
+			"type": "file",
+			"file": "00_Meta/Project_Home.md",
+			"x": 70,
+			"y": -110,
+			"width": 310,
+			"height": 340,
+			"color": "3"
+		},
+        {
+			"id": "node-6",
+			"type": "group",
+			"label": "Brainstorming Area",
+			"x": -400,
+			"y": 300,
+			"width": 800,
+			"height": 400,
+			"color": "4"
+		}
+	],
+	"edges": []
+}

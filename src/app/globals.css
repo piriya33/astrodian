@@ -1,0 +1,81 @@
+:root {
+  /* Daylight Gold Palette (Solid Luxury) */
+  --bg-primary: #fdfbf7; 
+  --bg-gradient: none; /* Removed gradient for solid look */
+  --bg-secondary: #ffffff;  /* Solid white cards */
+  --bg-input: #f9f8f4; /* Very subtle off-white inputs */
+  
+  --text-primary: #1c1917; /* Deep stone brown */
+  --text-secondary: #78716c; /* Muted warm stone */
+  
+  --accent-gold: #b45309; /* Deep Antique Gold */
+  --accent-crystal: #d97706; /* Warmer Gold */
+  --accent-stone: rgba(180, 83, 9, 0.05); /* Very subtle gold wash */
+  
+  --border-light: rgba(180, 83, 9, 0.15); /* Subtle antique gold border */
+  --border-strong: rgba(180, 83, 9, 0.3);
+  
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 24px 38px 3px rgba(0, 0, 0, 0.02); /* Crisp elevation */
+
+  /* SVG Specific Variables */
+  --chart-bg-inner: #ffffff;
+  --chart-grid: rgba(180, 83, 9, 0.2);
+  --chart-planet-fill: #ffffff;
+}
+
+[data-theme="rahu"] {
+  /* Rahu Mode (Solid Luxury Night) */
+  --bg-primary: #09090b; /* Deep Onyx */
+  --bg-gradient: none; 
+  --bg-secondary: #18181b; /* Solid Dark Grey Cards */
+  --bg-input: #121214; /* Inset dark input */
+  
+  --text-primary: #fafaf9; /* Warm starlight */
+  --text-secondary: #a8a29e; /* Muted warm grey */
+  
+  --accent-gold: #fbbf24; /* Bright Glowing Gold */
+  --accent-crystal: #f59e0b; /* Amber */
+  --accent-stone: rgba(251, 191, 36, 0.1); 
+  
+  --border-light: rgba(255, 255, 255, 0.08); /* Crisp subtle border instead of gold */
+  --border-strong: rgba(251, 191, 36, 0.3);
+  
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 24px 38px 3px rgba(0, 0, 0, 0.2);
+
+  /* SVG Specific Variables */
+  --chart-bg-inner: #18181b;
+  --chart-grid: rgba(251, 191, 36, 0.3);
+  --chart-planet-fill: #09090b;
+}
+
+html,
+body {
+  max-width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--bg-primary);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: var(--font-inter), sans-serif;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Base Headings mapped to Cinzel */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-cinzel), serif;
+  font-weight: 500;
+}
