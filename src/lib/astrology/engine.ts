@@ -21,10 +21,14 @@ export function getAstrologicalDayInfo(
 ): { dayOfWeek: number; isRahu: boolean } {
   const jd_birth = getJulianDay(date);
 
-  // To find the sunrise for the current local day, we construct a Date object
-  // for 00:00:00 UTC of the same day. sweph works in UTC internally.
+  // To find the sunrise for the birth day, we need LOCAL midnight (not UTC midnight).
+  // UTC midnight (00:00Z) = 07:00 Bangkok, which is AFTER sunrise (~06:00-06:30).
+  // If we use UTC midnight, rise_trans() finds NEXT day's sunrise → wrong day!
+  // Fix (per natal-chart-manual §8): subtract longitude-based TZ offset.
+  const approxTzHours = Math.round(lon / 15); // e.g. Bangkok 100.5° → +7
   const midnight = new Date(date.getTime());
   midnight.setUTCHours(0, 0, 0, 0);
+  midnight.setTime(midnight.getTime() - approxTzHours * 3600000); // local midnight in UTC
   const jd_midnight = getJulianDay(midnight);
 
   const geopos: [number, number, number] = [lon, lat, elev];

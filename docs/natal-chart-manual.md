@@ -321,3 +321,82 @@ function formatDegree(longitude: number): string {
 | Reading `result.ascmc[]` from sweph | Correct path is `result.data.points[]` and `result.data.houses[]` |
 | No timezone offset on `new Date()` | Must convert birth local time to UTC using birth location's timezone |
 | Relying on server timezone = birth timezone | Use explicit offset (e.g., `+07:00`) or lookup from lat/lon |
+
+---
+
+## 8. 🐛 Critical Bug: Sunrise Calculation → Wrong Mahadasha
+
+### ปัญหา
+
+`getAstrologicalDayInfo()` ใน [engine.ts](file:///Users/piriyasambandaraksa/Dropbox/Antigravity/Projects/astrodian/src/lib/astrology/engine.ts) คำนวณ **วันทางโหราศาสตร์** ผิด ทำให้ **มหาทักษา (108-year cycle) เพี้ยนทั้งหมด**
+
+### Root Cause
+
+```typescript
+// engine.ts line 26-28
+const midnight = new Date(date.getTime());
+midnight.setUTCHours(0, 0, 0, 0);  // ← BUG: midnight UTC, NOT local midnight
+const jd_midnight = getJulianDay(midnight);
+```
+
+**midnight UTC (00:00Z) = 07:00 AM Bangkok** — ซึ่ง **ผ่านเวลา sunrise ไปแล้ว** (~06:00-06:30)
+
+ดังนั้น `sweph.rise_trans()` ค้นหา sunrise ของ **วันถัดไป** แทน:
+
+```
+Timeline (UTC):
+00:00Z (= 07:00 BKK) ← midnight.setUTCHours(0)
+                       ↑ Sunrise Jan 13 already passed!
+                       → sweph finds NEXT sunrise = Jan 14 06:46 BKK
+
+02:45Z (= 09:45 BKK) ← birth time
+                       code: 02:45 < Jan14 sunrise? → YES → "before sunrise" → WRONG!
+```
+
+### ผลกระทบ
+
+| ค่า | ผิด (ปัจจุบัน) | ถูกต้อง |
+|-----|--------------|---------|
+| วันเกิด Piriya (13 ม.ค. 1985) | **เสาร์** | **อาทิตย์** |
+| ดาวเสวยอายุเริ่มต้น | เสาร์ (10y) | อาทิตย์ (6y) |
+| ดาวเสวยอายุ age 42 | **ศุกร์ (ปีที่ 1/21)** | **พุธ (ปีที่ 13/17)** |
+| Mahadasha ทั้งหมด | ผิดหมด | ถูก |
+
+### Fix
+
+เปลี่ยนจาก midnight UTC → midnight **local time ของสถานที่เกิด**:
+
+```typescript
+// ❌ WRONG (current)
+midnight.setUTCHours(0, 0, 0, 0);
+
+// ✅ FIX: Use local midnight based on birth longitude
+// Longitude-based timezone estimate: 1 hour per 15° of longitude
+const tzOffsetHours = Math.round(lon / 15); // e.g. Bangkok 100.5° → +7
+const localMidnightUTC_hours = 24 - tzOffsetHours; // e.g. 24-7 = 17 → previous day 17:00 UTC
+const midnight = new Date(date.getTime());
+midnight.setUTCHours(0, 0, 0, 0);
+// Go back to previous day's local midnight
+midnight.setUTCHours(midnight.getUTCHours() - tzOffsetHours);
+```
+
+หรือดีกว่า ใช้ **วิธีที่แม่นยำกว่า**:
+
+```typescript
+// ✅ BEST: set midnight to well before sunrise (previous day evening UTC)
+// For any location in Asia (UTC+5 to UTC+9), local midnight ≈ 15:00-19:00 UTC previous day
+const midnight = new Date(date.getTime());
+midnight.setUTCHours(0, 0, 0, 0);
+// Subtract timezone offset so we get LOCAL midnight
+const approxTzHours = Math.round(lon / 15);
+midnight.setTime(midnight.getTime() - approxTzHours * 3600000);
+const jd_midnight = getJulianDay(midnight);
+// Now rise_trans will find TODAY's sunrise (not tomorrow's)
+```
+
+### Verification
+
+หลัง fix แล้ว ต้องได้:
+- Piriya (13 ม.ค. 1985, 09:45 BKK): **Sunday** (อาทิตย์) → เริ่ม Sun(6y) → age 42 = Mercury ปีที่ 13/17
+- Juranon (9 ส.ค. 2001, 09:45 Roi Et): ตรวจสอบเทียบด้วย
+
