@@ -347,19 +347,43 @@ export default function Home() {
     setChatLoading(true);
 
     try {
+      // 1. Generate Invoice (108 sats for follow up)
+      const invRes = await fetch('/api/payments/invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 108, memo: 'PEKKY Follow-up Question' })
+      });
+      const invData = await invRes.json();
+      if (!invData.payment_request) throw new Error("Failed to get invoice");
+      
+      // 2. Pay Invoice via WebLN
+      let paymentHash = '';
+      if (typeof window.webln !== 'undefined') {
+        await window.webln.enable();
+        const response = await window.webln.sendPayment(invData.payment_request);
+        paymentHash = response.preimage;
+      } else {
+        alert("Lightning wallet (Alby) not found. Follow-up feature requires Lightning Network.");
+        setChatLoading(false);
+        return;
+      }
+
+      // 3. Send follow-up request to API
       const res = await fetch('/api/astrology', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({ messages: newMessages, follow_up: true, payment_hash: paymentHash }),
       });
       const data = await res.json();
       
       if (data.reading) {
         setChatMessages([...newMessages, { role: 'assistant', content: data.reading }]);
+      } else if (data.error) {
+        alert("Pekky error: " + data.error);
       }
     } catch (error) {
       console.error('Chat error:', error);
-      alert("Failed to get response from Pekky.");
+      alert("Failed to get response from Pekky. If you paid, please hold on.");
     }
     setChatLoading(false);
   };
@@ -846,7 +870,7 @@ export default function Home() {
                         type="text" 
                         value={chatInput} 
                         onChange={(e) => setChatInput(e.target.value)} 
-                        placeholder="Ask a specific question about your destiny..." 
+                        placeholder="Ask a specific question about your destiny... (108 Sats)" 
                         className={styles.input} 
                         disabled={chatLoading}
                       />

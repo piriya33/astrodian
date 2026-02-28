@@ -37,6 +37,65 @@ Always address the user as "คุณ" (khun). Always respond in Thai.
 | `seiya` | เภกกี้จักรราศี — สไตล์เซนต์เซย่า พลังจักรราศีกับโชคชะตา |
 | `jojo` | เภกกี้สแตนด์ — สไตล์โจโจ้ ไพ่ทาโรต์กับการยืนหยัด |
 
+### กฎเหล็กเรื่องความชัดเจน (Anti-Hedge Rules)
+
+> [!WARNING]
+> **Output ปัจจุบันมีปัญหา:** ใช้คำว่า "อาจ" 5+ ครั้งต่อย่อหน้า อ่านแล้วไม่รู้ว่าแปลว่าอะไร
+
+**เพิ่ม rules เหล่านี้ใน prompt ทุกโหมด:**
+
+```
+=== กฎความชัดเจนในการเขียน (CLARITY RULES — บังคับ) ===
+
+1. ห้ามใช้คำว่า "อาจ" "น่าจะ" "เป็นไปได้ว่า" เกิน 2 ครั้งต่อย่อหน้า 
+   ที่เหลือให้เขียนเป็นประโยคบอกเล่ามั่นใจ
+
+2. ทุกคำทำนายต้องมี "เพราะ..." ที่อ้างอิงตำแหน่งดาวเฉพาะ
+   ❌ "เรื่องการเงินอาจมีอุปสรรค"
+   ✅ "เรื่องการเงินติดขัด เพราะดาวเสาร์ (ข้อจำกัด) นั่งภพ 2 (รายได้)"
+
+3. ห้ามกองคำกว้าง ๆ เช่น "อุปสรรค ความเปลี่ยนแปลง หรือความวิตกกังวล"
+   ให้เลือกอันเดียวที่ตรงกับดาวที่สุด แล้วอธิบายให้ชัด
+   ❌ "อาจเผชิญอุปสรรค ความผิดหวัง หรือการสูญเสีย"
+   ✅ "ระวังเรื่องเงินรั่วไหลจากคนใกล้ชิด เพราะดาวราหูจรทำมุมเล็งดาวศุกร์เดิม"
+
+4. ให้เปรียบเทียบกับชีวิตจริงอย่างน้อย 1 ครั้งต่อหัวข้อ
+   ❌ "ดาวเสาร์ครองภพบุตร ส่งผลให้บุตรเป็นภาระหนัก"
+   ✅ "คุณเป็นพ่อ/แม่สไตล์เข้มงวดแต่ลึก ๆ ห่วงมาก 
+      เหมือนพ่อที่ไม่เคยพูดว่ารัก แต่ตื่นมาทำข้าวให้ลูกทุกเช้า"
+
+5. ห้ามจบย่อหน้าด้วยประโยคซ้ำแบบ "ดังนั้นจึงควรระวัง" 
+   ให้จบด้วย action ที่ทำได้จริง
+   ❌ "ดังนั้นควรระมัดระวังเรื่องการเงินเป็นพิเศษ"
+   ✅ "ช่วงนี้: ห้ามค้ำประกันให้ใคร, ตรวจสอบรายจ่ายรายสัปดาห์"
+
+6. ห้ามใช้คำศัพท์โหราศาสตร์โดยไม่แปลความหมาย
+   ❌ "ดาวเป็นนิจ"
+   ✅ "ดาวเป็นนิจ (พลังตก อ่อนแอ เหมือนนักกีฬาที่บาดเจ็บ)"
+
+7. แต่ละย่อหน้าต้องสั้น 1-3 ประโยค
+   ห้ามเขียนติดกัน 5+ ประโยคในย่อหน้าเดียว
+
+8. น้ำเสียงต้องเหมือน "พี่ที่เก่งเรื่องดวงคุยให้ฟัง" 
+   ไม่ใช่ "ตำราโหราศาสตร์"
+```
+
+#### ตัวอย่าง Before/After
+
+```diff
+- เรื่องบุตรธิดาจึงอาจเป็นเรื่องที่คุณต้องใช้ความพยายาม
+- และความเข้าใจอย่างมากครับ อาจต้องเผชิญกับอุปสรรค 
+- ความเปลี่ยนแปลงที่ไม่คาดฝัน หรือความวิตกกังวล
+- บางประการเกี่ยวกับบุตร
+
++ คุณเป็นพ่อ/แม่ที่รักลูกแบบเงียบ ๆ แต่แสดงออกยาก
++ เพราะดาวราหู (ความกังวล) นั่งเฝ้าภพบุตร
++
++ แปลว่า: ลูกของคุณจะเป็น "ครูชีวิต" — 
++ เรื่องลูกจะบังคับให้คุณเติบโตขึ้นเป็นผู้ใหญ่
++ ไม่ต้องกลัว แต่ต้องพร้อมปรับตัว
+```
+
 ---
 
 ## 2. Reading Modes Overview
@@ -346,7 +405,7 @@ POST /api/astrology
 เพื่อไม่ให้ context ยาวเกินไป (ประหยัด token):
 1. **คำถามแรก:** ส่ง reading เดิมเต็ม ๆ เป็น assistant message
 2. **คำถามที่ 2+:** สรุป reading เดิม + คำถาม-คำตอบก่อนหน้า (max 3 turns)
-3. **Limit:** สูงสุด 5 follow-up ต่อ session
+3. **Limit:** ไม่จำกัดจำนวนครั้ง ถามได้เรื่อยๆ ตราบใดที่มีการจ่าย L402 (108 sats/คำถาม)
 
 ### ข้อดีเทียบกับ Conversation Mode
 | | Conversation เดิม | Follow-up |
@@ -582,5 +641,39 @@ const chunk2Prompt = `
 |------|---------------|
 | [route.ts](file:///Users/piriyasambandaraksa/Dropbox/Antigravity/Projects/astrodian/src/app/api/astrology/route.ts) | เพิ่ม mode ใหม่ (`focus_*`, `bitcoin_synastry`), implement smart chunking |
 | [prompt_compiler.ts](file:///Users/piriyasambandaraksa/Dropbox/Antigravity/Projects/astrodian/src/lib/astrology/prompt_compiler.ts) | แก้คำว่า "พี่" → "คุณ", เพิ่ม chunk builder functions |
-| [engine.ts](file:///Users/piriyasambandaraksa/Dropbox/Antigravity/Projects/astrodian/src/lib/astrology/engine.ts) | เพิ่ม `getBitcoinNatalChart()` (hardcoded Genesis Block data) |
+| [engine.ts](file:///Users/piriyasambandaraksa/Dropbox/Antigravity/Projects/astrodian/src/lib/astrology/engine.ts) | เพิ่ม `getBitcoinNatalChart()` (hardcoded Genesis Block data), **แก้ sunrise bug (§8 ของ manual)** |
 | [page.tsx](file:///Users/piriyasambandaraksa/Dropbox/Antigravity/Projects/astrodian/src/app/page.tsx) | เพิ่ม UI สำหรับ mode ใหม่ในตัวเลือก |
+
+---
+
+## 13. Model Upgrade Roadmap
+
+| Phase | Model | ใช้กับ | เหตุผล |
+|-------|-------|--------|--------|
+| **ปัจจุบัน (Dev)** | Gemini 2.5 Flash | ทุกโหมด | ถูก เร็ว เหมาะ dev/test |
+| **Production v1** | Gemini 2.5 **Pro** | Paid tiers (detailed, blueprint, focus) | ฉลาดกว่า เข้าใจ context ยาว ภาษาไทยดีกว่า |
+| | Gemini 2.5 Flash | Free tiers (daily, chart) | ประหยัด cost สำหรับ free users |
+| **Production v2** | ทดสอบ Claude 3.5 Sonnet | Blueprint, Focus | ภาษาไทยดีมาก tone เป็นธรรมชาติ |
+| | หรือ GPT-4o | เปรียบเทียบผล | |
+
+### Implementation
+```typescript
+// route.ts — เลือก model ตาม mode
+const modelName = ['daily', 'chart'].includes(mode) 
+  ? 'models/gemini-2.5-flash'     // Free tier: ใช้ Flash
+  : 'models/gemini-2.5-pro';      // Paid tier: ใช้ Pro
+
+const { text } = await generateText({
+  model: google(modelName),
+  system: SYSTEM_PROMPT,
+  prompt: prompt
+});
+```
+
+### Cost Estimate (per reading)
+
+| Model | Input tokens | Output tokens | ราคา/reading |
+|-------|-------------|--------------|-------------|
+| Flash | ~2K | ~1.5K | ~$0.001 |
+| Pro | ~2K | ~1.5K | ~$0.01 |
+| Claude Sonnet | ~2K | ~1.5K | ~$0.02 |

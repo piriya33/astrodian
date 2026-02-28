@@ -101,7 +101,7 @@ async function generateWithFallback(systemPrompt: string, userPrompt: string): P
 
 export async function POST(req: Request) {
   try {
-    const { birthDateStr, birthTimeStr, lat, lon, mode, persona, payment_hash, messages, follow_up, utcOffset } = await req.json();
+    const { name, birthDateStr, birthTimeStr, lat, lon, mode, persona, payment_hash, messages, follow_up, utcOffset } = await req.json();
 
     // ===== FOLLOW-UP QUESTIONS (per spec §7) =====
     if (follow_up && messages && messages.length > 0) {
@@ -109,11 +109,17 @@ export async function POST(req: Request) {
       const payCheck = await verifyPayment(payment_hash);
       if (!payCheck.ok) return NextResponse.json({ success: false, error: payCheck.error }, { status: payCheck.status });
 
+      let chatMessages = messages;
+      // Limit context to Max 3 turns (System + Original Reading + last 6 messages)
+      if (messages.length > 8) {
+        chatMessages = [messages[0], messages[1], ...messages.slice(-6)];
+      }
+
       if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
         const { text } = await generateText({
           model: google('models/gemini-2.5-flash'),
           system: SYSTEM_PROMPT,
-          messages: messages,
+          messages: chatMessages,
         });
         return NextResponse.json({ success: true, reading: text });
       }
@@ -195,10 +201,11 @@ export async function POST(req: Request) {
 
       // ===== DAILY (Free, ~500 words, per spec §4) =====
       case 'daily':
+        const userName = name ? `คุณ${name}` : 'คุณ';
         modeInstructions = `
 === คำสั่ง Mode: สรุปรายวัน (Daily Summary) ===
 
-1. **สวัสดีตอน${greeting} (Greeting):** ทักทายคุณสั้นกระชับ 1 บรรทัด พร้อมบอกวันนี้ดาวอะไรเด่น
+1. **สวัสดีตอน${greeting} (Greeting):** ทักทาย${userName}สั้นกระชับ 1 บรรทัด พร้อมบอกวันนี้ดาวอะไรเด่น
 
 2. **เข็มทิศวันนี้ (Today's Focus):** วิเคราะห์เฉพาะ Transit Aspects ที่ active วันนี้
    - ดาวจรตัวไหนทำมุมอะไรกับดาวเดิม?
@@ -341,6 +348,13 @@ export async function POST(req: Request) {
       // ===== BITCOIN SYNASTRY (Paid ~1,620 sats, per spec §9) =====
       case 'bitcoin_synastry':
         requiresPayment = true;
+        // Require calculateAspects from analytics
+        const { calculateAspects } = require('@/lib/astrology/analytics');
+        const btcSynastryAspects = calculateAspects(planets, BITCOIN_NATAL.planets);
+        let btcAspectsText = btcSynastryAspects.length > 0 ? 
+          btcSynastryAspects.map((a: any) => `- ${a.planet1} (คุณ) ทำมุม ${a.aspectType} กับ ${a.planet2} (Bitcoin) - ${a.significance}`).join('\n') :
+          '- ไม่มีมุมดาวสำคัญที่เชื่อมโยงกันตรงๆ (อิสระต่อกัน)';
+
         modeInstructions = `
 === คำสั่ง Mode: ซินแอสทรีกับบิตคอยน์ ===
 
@@ -352,22 +366,24 @@ ${BITCOIN_NATAL.planets.map(p => `- ${p.name}: ${p.zodiac} ${p.degree.toFixed(2)
 - ASC: Leo 8°53' (lng: ${BITCOIN_NATAL.ascendant}°)
 - MC: Aries 18°35' (lng: ${BITCOIN_NATAL.mc}°)
 
+=== จุดเชื่อมมุมดาว (Cross-Chart Synastry Aspects ที่คำนวณไว้แล้ว) ===
+${btcAspectsText}
+
 === โครงสร้างคำทำนาย ===
 
 1. **ดวงบิตคอยน์:** อธิบายสั้นๆ ว่า Bitcoin มีลักษณะดวงอย่างไร
    (Sun Cap, Moon Aries, ASC Leo — ดวงของนักต่อสู้ผู้ไม่ยอมแพ้)
 
 2. **จุดเชื่อม (Synastry Aspects):** 
-   หามุมดาวระหว่างดาวของคุณกับดาวของ Bitcoin:
-   - ดาวของคุณตัวไหน Conjunct / Trine / Square กับดาว Bitcoin?
-   - สิ่งนี้บอกอะไรเกี่ยวกับ "ความสัมพันธ์" ของคุณกับ Bitcoin?
+   วิเคราะห์จาก "จุดเชื่อมมุมดาว" ที่คำนวณมาให้ด้านบน:
+   - อธิบายว่าดาวคู่ไหนส่งผลอย่างไรต่อ "ความสัมพันธ์" และ "Mindset" ของคุณต่อ Bitcoin?
 
 3. **ความเหมาะสม (Compatibility Index):**
    - ระดับ "ความเข้ากัน" (ไม่ใช่คำแนะนำการลงทุน)
    - จุดที่เสริมกัน vs จุดที่ขัดแย้ง
 
 4. **จังหวะ Bitcoin ในดวงของคุณ:**
-   - Transit ของ Bitcoin กระทบดวงคุณอย่างไร?
+   - Transit ของฟ้าปัจจุบันกระทบดวงคุณร่วมกับบริบท Bitcoin อย่างไร?
 
 === Disclaimer ===
 ปิดท้ายด้วย: "การวิเคราะห์นี้เป็นมุมมองทางโหราศาสตร์เชิงสร้างสรรค์ ไม่ใช่คำแนะนำการลงทุน ราคา Bitcoin ขึ้นอยู่กับปัจจัยตลาดเป็นหลัก"
