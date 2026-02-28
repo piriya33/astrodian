@@ -60,9 +60,9 @@ const PLANET_COLORS: Record<string, string> = {
 
 const ASPECT_RULES = [
   { name: 'Conjunction', angle: 0, orb: 10, color: '#facc15' },
-  { name: 'Opposition', angle: 180, orb: 10, color: '#ef4444' },
-  { name: 'Trine', angle: 120, orb: 10, color: '#10b981' },
-  { name: 'Square', angle: 90, orb: 10, color: '#ef4444' },
+  { name: 'Opposition', angle: 180, orb: 8, color: '#ef4444' },
+  { name: 'Trine', angle: 120, orb: 8, color: '#10b981' },
+  { name: 'Square', angle: 90, orb: 8, color: '#ef4444' },
   { name: 'Sextile', angle: 60, orb: 6, color: '#38bdf8' }
 ];
 
