@@ -76,6 +76,36 @@ export function compileAstroPrompt(data: AstroContextData, personaTone: string, 
       const name2 = p2Knowledge ? p2Knowledge.thName : aspect.planet2;
       natalAspectDetails += `- ดาว${name1} ทำมุม ${aspect.aspectType} กับดาว${name2} (orb: ${aspect.orb}°, ${aspect.significance})\n`;
     });
+
+    // --- NEW: Global Pattern Detection (e.g. Grand Trine) ---
+    const patterns: string[] = [];
+    const planetTrines: Record<string, string[]> = {};
+    natalAspects.filter(a => a.aspectType === 'Trine').forEach(a => {
+      if (!planetTrines[a.planet1]) planetTrines[a.planet1] = [];
+      if (!planetTrines[a.planet2]) planetTrines[a.planet2] = [];
+      planetTrines[a.planet1].push(a.planet2);
+      planetTrines[a.planet2].push(a.planet1);
+    });
+
+    // Detect Grand Trine: A-B, B-C, C-A all trine
+    const planetsWithTrines = Object.keys(planetTrines);
+    for (let i = 0; i < planetsWithTrines.length; i++) {
+      for (let j = i + 1; j < planetsWithTrines.length; j++) {
+        for (let k = j + 1; k < planetsWithTrines.length; k++) {
+          const pA = planetsWithTrines[i];
+          const pB = planetsWithTrines[j];
+          const pC = planetsWithTrines[k];
+          if (planetTrines[pA].includes(pB) && planetTrines[pB].includes(pC) && planetTrines[pC].includes(pA)) {
+             const names = [pA, pB, pC].map(p => (PLANETS[p as keyof typeof PLANETS]?.thName || p));
+             patterns.push(`[SUPER_BLESSING] พบโครงสร้าง **Grand Trine (ตรีโกณศักดิ์สิทธิ์)** ระหว่างดาว ${names.join(', ')}: นี่คือสัญลักษณ์ของพรสวรรค์ที่ยิ่งใหญ่และความสำเร็จที่มาอย่างเป็นธรรมชาติ ห้ามข้ามการวิเคราะห์จุดนี้เด็ดขาด!`);
+          }
+        }
+      }
+    }
+
+    if (patterns.length > 0) {
+      natalAspectDetails = `\n!!! พบโครงสร้างดวงดาวสำคัญ (PATTERN DETECTED) !!!\n${patterns.join('\n')}\n\n` + natalAspectDetails;
+    }
   } else {
     natalAspectDetails = "- ไม่พบมุมดาวพื้นดวงที่สำคัญ\n";
   }

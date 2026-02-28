@@ -137,7 +137,7 @@ export const ASPECTS = {
   },
   Trine: {
     angle: 120,
-    orb: 8,
+    orb: 10,
     meaning: 'ตรีโกณ (Trine) ความโชคดี พรสวรรค์ พลังงานไหลลื่นที่สุด (เหมือนคู่ธาตุ)'
   },
   Opposition: {
